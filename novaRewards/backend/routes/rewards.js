@@ -1,14 +1,48 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const rateLimit = require('express-rate-limit');
-const { createHash } = require('crypto');
-const { query } = require('../db/index');
-const { getCampaignById, getActiveCampaign } = require('../db/campaignRepository');
-const { recordTransaction } = require('../db/transactionRepository');
-const { distributeRewards } = require('../../blockchain/sendRewards');
-const { isValidStellarAddress } = require('../../blockchain/stellarService');
-const { authenticateMerchant } = require('../middleware/authenticateMerchant');
-const { verifyTrustline } = require('../services/stellar');
+const rateLimit = require("express-rate-limit");
+const { createHash } = require("crypto");
+const { query } = require("../db/index");
+const {
+  getCampaignById,
+  getActiveCampaign,
+} = require("../db/campaignRepository");
+const { recordTransaction } = require("../db/transactionRepository");
+const { distributeRewards } = require("../../blockchain/sendRewards");
+const { isValidStellarAddress } = require("../../blockchain/stellarService");
+const { authenticateMerchant } = require("../middleware/authenticateMerchant");
+const { verifyTrustline } = require("../services/stellar");
+
+/**
+ * GET /api/rewards
+ * Returns the active rewards catalogue, optionally filtered by category.
+ * Public endpoint — no auth required.
+ */
+router.get("/", async (req, res, next) => {
+  try {
+    const { category } = req.query;
+    const params = [];
+    let categoryClause = "";
+
+    if (category && category.trim()) {
+      params.push(category.trim());
+      categoryClause = `AND category = $${params.length}`;
+    }
+
+    const { rows } = await query(
+      `SELECT id, name, cost, stock, is_active, category, image_url, created_at
+       FROM rewards
+       WHERE is_deleted = FALSE AND is_active = TRUE
+       ${categoryClause}
+       ORDER BY cost ASC`,
+      params,
+    );
+
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    next(err);
+  }
+});
 
 /**
  * Rate limiter: max 20 requests per minute per IP on the distribute endpoint.
@@ -21,8 +55,8 @@ const distributeRateLimiter = rateLimit({
   legacyHeaders: false,
   message: {
     success: false,
-    error: 'rate_limit_exceeded',
-    message: 'Too many requests. Please try again later.',
+    error: "rate_limit_exceeded",
+    message: "Too many requests. Please try again later.",
   },
 });
 
@@ -31,86 +65,97 @@ const distributeRateLimiter = rateLimit({
  * Distributes NOVA tokens to a customer wallet.
  * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 7.4, 7.5
  */
-router.post('/distribute', distributeRateLimiter, authenticateMerchant, async (req, res, next) => {
-  try {
-    const { walletAddress, amount, campaignId } = req.body;
+router.post(
+  "/distribute",
+  distributeRateLimiter,
+  authenticateMerchant,
+  async (req, res, next) => {
+    try {
+      const { walletAddress, amount, campaignId } = req.body;
 
-    if (!walletAddress || !amount) {
-      return res.status(400).json({
+      if (!walletAddress || !amount) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Missing required fields: walletAddress and amount are required",
+        });
+      }
+
+      if (amount <= 0) {
+        return res.status(400).json({
+          success: false,
+          error: "Amount must be greater than zero",
+        });
+      }
+
+      // Verify trustline exists
+      const hasTrustline = await verifyTrustline(walletAddress);
+      if (!hasTrustline) {
+        return res.status(400).json({
+          success: false,
+          error: "no_trustline",
+          message:
+            "Recipient does not have a NOVA trustline. Please add NOVA trustline first.",
+        });
+      }
+
+      // Distinguish campaign not found vs inactive/expired for clearer client handling.
+      const campaignExists = await getCampaignById(campaignId);
+      if (!campaignExists) {
+        return res.status(404).json({
+          success: false,
+          error: "not_found",
+          message: "Campaign does not exist",
+        });
+      }
+
+      // Validate campaign is active and belongs to this merchant
+      const campaign = await getActiveCampaign(campaignId);
+      if (!campaign) {
+        return res.status(400).json({
+          success: false,
+          error: "invalid_campaign",
+          message: "Campaign is expired or inactive",
+        });
+      }
+
+      if (campaign.merchant_id !== req.merchant.id) {
+        return res.status(403).json({
+          success: false,
+          error: "forbidden",
+          message: "Campaign does not belong to this merchant",
+        });
+      }
+
+      // Distribute rewards
+      const result = await distributeRewards({
+        recipient: walletAddress,
+        amount,
+        campaignId,
+      });
+
+      res.json({
+        success: true,
+        txHash: result.txHash,
+        transaction: result.tx,
+      });
+    } catch (err) {
+      if (err.code === "no_trustline") {
+        return res.status(400).json({
+          success: false,
+          error: "no_trustline",
+          message: err.message,
+        });
+      }
+
+      console.error("Error distributing rewards:", err);
+      res.status(500).json({
         success: false,
-        error: 'Missing required fields: walletAddress and amount are required',
+        error: "internal_server_error",
+        message: err.message || "Failed to distribute rewards",
       });
     }
-
-    if (amount <= 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Amount must be greater than zero',
-      });
-    }
-
-    // Verify trustline exists
-    const hasTrustline = await verifyTrustline(walletAddress);
-    if (!hasTrustline) {
-      return res.status(400).json({
-        success: false,
-        error: 'no_trustline',
-        message: 'Recipient does not have a NOVA trustline. Please add NOVA trustline first.',
-      });
-    }
-
-    // Distinguish campaign not found vs inactive/expired for clearer client handling.
-    const campaignExists = await getCampaignById(campaignId);
-    if (!campaignExists) {
-      return res.status(404).json({
-        success: false,
-        error: 'not_found',
-        message: 'Campaign does not exist',
-      });
-    }
-
-    // Validate campaign is active and belongs to this merchant
-    const campaign = await getActiveCampaign(campaignId);
-    if (!campaign) {
-      return res.status(400).json({
-        success: false,
-        error: 'invalid_campaign',
-        message: 'Campaign is expired or inactive',
-      });
-    }
-
-    if (campaign.merchant_id !== req.merchant.id) {
-      return res.status(403).json({
-        success: false,
-        error: 'forbidden',
-        message: 'Campaign does not belong to this merchant',
-      });
-    }
-
-    // Distribute rewards
-    const result = await distributeRewards({
-      recipient: walletAddress,
-      amount,
-      campaignId,
-    });
-
-    res.json({ success: true, txHash: result.txHash, transaction: result.tx });
-  } catch (err) {
-    if (err.code === 'no_trustline') {
-      return res.status(400).json({
-        success: false,
-        error: 'no_trustline',
-        message: err.message,
-      });
-    }
-    
-    console.error('Error distributing rewards:', err);
-    res.status(500).json({
-      success: false,
-      error: 'internal_server_error',
-      message: err.message || 'Failed to distribute rewards',
-    });
-  }
-});
+  },
+);
 
 module.exports = router;

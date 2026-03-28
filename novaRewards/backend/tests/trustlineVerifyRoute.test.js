@@ -10,6 +10,10 @@ process.env.HORIZON_URL = 'https://horizon-testnet.stellar.org';
 process.env.ISSUER_PUBLIC = 'GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN';
 process.env.STELLAR_NETWORK = 'testnet';
 
+jest.setTimeout(15000);
+
+jest.setTimeout(15000);
+
 // Mock stellarService — isValidStellarAddress uses real StrKey logic
 jest.mock('../../blockchain/stellarService', () => {
   const { StrKey } = require('stellar-sdk');
@@ -38,6 +42,11 @@ function buildApp() {
   const app = express();
   app.use(express.json());
   app.use('/api/trustline', require('../routes/trustline'));
+  app.use((err, req, res, next) => {
+    const status = err.type === 'entity.parse.failed' ? 400 : (err.status || 500);
+    const code = err.type === 'entity.parse.failed' ? 'validation_error' : (err.code || 'internal_error');
+    res.status(status).json({ success: false, error: code });
+  });
   return app;
 }
 

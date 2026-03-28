@@ -1,0 +1,310 @@
+
+> nova-rewards-backend@1.0.0 test
+> jest --runInBand --coverage
+
+FAIL tests/distributionBlockedWithoutTrustline.test.js (15.88 s)
+  distributeRewards — no trustline blocks distribution (unit, Property 8)
+    ✓ throws no_trustline for ANY valid recipient address when trustline is absent (117 ms)
+    ✓ error code is exactly "no_trustline" (not a generic error) for any wallet (23 ms)
+    ✓ no_trustline is thrown regardless of the requested amount (28 ms)
+  POST /api/rewards/distribute — no trustline blocked at route (integration, Property 8)
+    ✕ returns 400 with error "no_trustline" for ANY wallet that has no trustline (5002 ms)
+    ✕ no_trustline response is consistent regardless of the amount requested (5001 ms)
+    ✕ wallets WITH a trustline are NOT blocked — distribution proceeds past the trustline gate (5001 ms)
+
+  ● POST /api/rewards/distribute — no trustline blocked at route (integration, Property 8) › returns 400 with error "no_trustline" for ANY wallet that has no trustline
+
+    SyntaxError: Unexpected token < in JSON at position 0
+        at JSON.parse (<anonymous>)
+
+       98 |         let raw = '';
+       99 |         res.on('data', (chunk) => { raw += chunk; });
+    > 100 |         res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(raw) }));
+          |                                                                          ^
+      101 |       }
+      102 |     );
+      103 |     req.on('error', reject);
+
+      at IncomingMessage.parse (tests/distributionBlockedWithoutTrustline.test.js:100:74)
+
+  ● POST /api/rewards/distribute — no trustline blocked at route (integration, Property 8) › returns 400 with error "no_trustline" for ANY wallet that has no trustline
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      230 |   });
+      231 |
+    > 232 |   test(
+          |   ^
+      233 |     'returns 400 with error "no_trustline" for ANY wallet that has no trustline',
+      234 |     async () => {
+      235 |       await fc.assert(
+
+      at test (tests/distributionBlockedWithoutTrustline.test.js:232:3)
+      at Object.describe (tests/distributionBlockedWithoutTrustline.test.js:213:1)
+
+  ● POST /api/rewards/distribute — no trustline blocked at route (integration, Property 8) › no_trustline response is consistent regardless of the amount requested
+
+    SyntaxError: Unexpected token < in JSON at position 0
+        at JSON.parse (<anonymous>)
+
+       98 |         let raw = '';
+       99 |         res.on('data', (chunk) => { raw += chunk; });
+    > 100 |         res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(raw) }));
+          |                                                                          ^
+      101 |       }
+      102 |     );
+      103 |     req.on('error', reject);
+
+      at IncomingMessage.parse (tests/distributionBlockedWithoutTrustline.test.js:100:74)
+
+  ● POST /api/rewards/distribute — no trustline blocked at route (integration, Property 8) › no_trustline response is consistent regardless of the amount requested
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      263 |   );
+      264 |
+    > 265 |   test(
+          |   ^
+      266 |     'no_trustline response is consistent regardless of the amount requested',
+      267 |     async () => {
+      268 |       await fc.assert(
+
+      at test (tests/distributionBlockedWithoutTrustline.test.js:265:3)
+      at Object.describe (tests/distributionBlockedWithoutTrustline.test.js:213:1)
+
+  ● POST /api/rewards/distribute — no trustline blocked at route (integration, Property 8) › wallets WITH a trustline are NOT blocked — distribution proceeds past the trustline gate
+
+    SyntaxError: Unexpected token < in JSON at position 0
+        at JSON.parse (<anonymous>)
+
+       98 |         let raw = '';
+       99 |         res.on('data', (chunk) => { raw += chunk; });
+    > 100 |         res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(raw) }));
+          |                                                                          ^
+      101 |       }
+      102 |     );
+      103 |     req.on('error', reject);
+
+      at IncomingMessage.parse (tests/distributionBlockedWithoutTrustline.test.js:100:74)
+
+  ● POST /api/rewards/distribute — no trustline blocked at route (integration, Property 8) › wallets WITH a trustline are NOT blocked — distribution proceeds past the trustline gate
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      292 |   );
+      293 |
+    > 294 |   test(
+          |   ^
+      295 |     'wallets WITH a trustline are NOT blocked — distribution proceeds past the trustline gate',
+      296 |     async () => {
+      297 |       await fc.assert(
+
+      at test (tests/distributionBlockedWithoutTrustline.test.js:294:3)
+      at Object.describe (tests/distributionBlockedWithoutTrustline.test.js:213:1)
+
+FAIL tests/trustlineVerifyRoute.test.js (5.325 s)
+  POST /api/trustline/verify
+    ✓ returns 200 with { exists: true } for a wallet that has a trustline (18 ms)
+    ✓ returns 200 with { exists: false } for a wallet without a trustline (5 ms)
+    ✓ returns 400 for an invalid Stellar address (4 ms)
+    ✓ returns 400 when walletAddress is missing from the body (11 ms)
+    ✕ returns 400 when the request body is empty (5001 ms)
+
+  ● POST /api/trustline/verify › returns 400 when the request body is empty
+
+    SyntaxError: Unexpected token < in JSON at position 0
+        at JSON.parse (<anonymous>)
+
+      60 |         let raw = '';
+      61 |         res.on('data', (chunk) => { raw += chunk; });
+    > 62 |         res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(raw) }));
+         |                                                                          ^
+      63 |       }
+      64 |     );
+      65 |     req.on('error', reject);
+
+      at IncomingMessage.parse (tests/trustlineVerifyRoute.test.js:62:74)
+
+  ● POST /api/trustline/verify › returns 400 when the request body is empty
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      128 |   });
+      129 |
+    > 130 |   test('returns 400 when the request body is empty', async () => {
+          |   ^
+      131 |     const { status, body } = await post(server, '/api/trustline/verify', '');
+      132 |
+      133 |     expect(status).toBe(400);
+
+      at test (tests/trustlineVerifyRoute.test.js:130:3)
+      at Object.describe (tests/trustlineVerifyRoute.test.js:71:1)
+
+FAIL tests/campaigns.test.js
+  POST /api/campaigns
+    ✕ 201 - creates campaign and returns it for valid input (17 ms)
+    ✓ 400 - rejects when rewardRate is 0 (5 ms)
+    ✓ 400 - rejects when rewardRate is negative (3 ms)
+    ✓ 400 - rejects when rewardRate is not a number (3 ms)
+    ✓ 400 - rejects when endDate equals startDate (3 ms)
+    ✓ 400 - rejects when endDate is before startDate (3 ms)
+    ✓ 400 - rejects when merchantId is missing (2 ms)
+    ✓ 400 - rejects when name is missing (2 ms)
+  GET /api/campaigns/:merchantId
+    ✓ 200 - returns an array of campaigns for a merchant (4 ms)
+    ✓ 200 - returns an empty array when merchant has no campaigns (3 ms)
+
+  ● POST /api/campaigns › 201 - creates campaign and returns it for valid input
+
+    listen EADDRINUSE: address already in use :::3001
+
+      46 |
+      47 | const PORT = process.env.PORT || 3001;
+    > 48 | app.listen(PORT, () => {
+         |     ^
+      49 |   console.log(`NovaRewards backend running on port ${PORT}`);
+      50 | });
+      51 |
+
+      at Function.listen (../node_modules/express/lib/application.js:635:24)
+      at Object.listen (server.js:48:5)
+      at Object.require (tests/campaigns.test.js:23:13)
+
+PASS tests/expiredCampaignBlocksDistribution.test.js
+  POST /api/rewards/distribute — expired campaign (Property 7)
+    ✓ returns 400 and never calls distributeRewards for any past end_date (151 ms)
+
+PASS tests/distributeExpiredCampaign.test.js
+  POST /api/rewards/distribute — expired campaign (Property 7)
+    ✓ returns 400 and never calls distributeRewards for any past end_date (139 ms)
+
+PASS tests/merchantRegister.test.js
+  POST /api/merchants/register
+    ✓ 201 – valid body returns merchant record with a generated api_key (12 ms)
+    ✓ 201 – businessCategory is optional; null is stored when omitted (3 ms)
+    ✓ 400 – missing name field (3 ms)
+    ✓ 400 – name is an empty / whitespace-only string (2 ms)
+    ✓ 400 – missing walletAddress field (2 ms)
+    ✓ 400 – empty request body (2 ms)
+    ✓ 400 – walletAddress is an arbitrary string (3 ms)
+    ✓ 400 – walletAddress is an empty string (2 ms)
+    ✓ 400 – walletAddress is a secret key (S-prefix) instead of a public key (9 ms)
+    ✓ 400 – invalid wallet address format (2 ms)
+    ✓ 201 – valid body with all fields returns merchant record with api_key (2 ms)
+    ✓ 201 – api_key is generated and returned (3 ms)
+    ✓ 400 – name is not a string (2 ms)
+    ✓ 400 – walletAddress is null (2 ms)
+
+PASS tests/trustline.test.js
+  verifyTrustline - idempotence (Property 2)
+    ✓ returns the same result on repeated calls for a wallet WITH a trustline (46 ms)
+    ✓ returns the same result on repeated calls for a wallet WITHOUT a trustline (28 ms)
+    ✓ returns { exists: false } for a 404 account without throwing (8 ms)
+
+PASS tests/stellarService.test.js
+  isValidStellarAddress
+    ✓ rejects arbitrary strings that are not valid Stellar public keys (37 ms)
+    ✓ accepts valid Stellar public keys generated from keypairs (55 ms)
+    ✓ rejects empty string (1 ms)
+    ✓ rejects null and undefined (1 ms)
+    ✓ rejects a valid-length string with wrong prefix
+
+PASS tests/distributeCampaignNotFound.test.js
+  POST /api/rewards/distribute — campaign not found
+    ✓ returns 404 when campaign does not exist (14 ms)
+
+PASS tests/sendRewards.test.js
+  distributeRewards
+    happy path
+      ✓ returns { success: true, txHash } when trustline exists and balance is sufficient (9 ms)
+      ✓ passes a signed transaction object to submitTransaction (2 ms)
+    error path: no trustline
+      ✓ throws with code no_trustline when recipient has no NOVA trustline (1 ms)
+      ✓ does not call server.loadAccount when trustline does not exist
+      ✓ does not call server.submitTransaction when trustline does not exist
+    error path: insufficient balance
+      ✓ throws with code insufficient_balance when distribution account balance is too low (1 ms)
+      ✓ treats a missing NOVA balance entry as zero (1 ms)
+    error path: Horizon submitTransaction throws
+      ✓ propagates errors thrown by submitTransaction (12 ms)
+    happy path: trustline exists, sufficient balance, Horizon returns success
+      ✓ calls verifyTrustline with recipient wallet (2 ms)
+      ✓ calls server.loadAccount with distribution account public key (2 ms)
+      ✓ calls server.submitTransaction with signed transaction (2 ms)
+    error path: Horizon throws
+      ✓ propagates error when server.loadAccount throws (1 ms)
+      ✓ propagates error when server.submitTransaction throws (2 ms)
+
+PASS tests/transactionsFallback.test.js
+  GET /api/transactions/:walletAddress — Horizon fallback
+    ✓ falls back to PostgreSQL and returns source: database when Horizon throws (6 ms)
+    ✓ queries PostgreSQL with the correct wallet address on fallback (3 ms)
+    ✓ returns the exact rows from PostgreSQL in data array (3 ms)
+    ✓ returns 400 for an invalid wallet address without hitting Horizon or DB (2 ms)
+
+PASS tests/buildTrustlineXDR.test.js
+  buildTrustlineXDR
+    ✓ calls server.loadAccount with the provided wallet address (7 ms)
+    ✓ returns a non-empty XDR string (2 ms)
+    ✓ XDR contains a changeTrust operation for the NOVA asset (2 ms)
+    ✓ mock server.loadAccount returns a mock account object (1 ms)
+    ✓ returned XDR is a non-empty string (1 ms)
+    ✓ transaction contains changeTrust operation for NOVA asset (2 ms)
+
+PASS tests/validateEnv.test.js
+  validateEnv (Property 11)
+    ✓ passes when all required env vars are set (2 ms)
+    ✓ throws for any non-empty subset of missing env vars (46 ms)
+    ✓ error message lists all missing keys (8 ms)
+    ✓ throws when ALLOWED_ORIGIN is missing in production (2 ms)
+    ✓ passes when ALLOWED_ORIGIN is set in production (1 ms)
+    ✓ passes when ALLOWED_ORIGIN is missing in development
+
+PASS tests/campaignRepository.test.js
+  validateCampaign (Property 3)
+    ✓ rejects reward rate <= 0 for any date range (31 ms)
+    ✓ rejects end date that is not strictly after start date (19 ms)
+    ✓ accepts valid campaign inputs (14 ms)
+
+PASS tests/transactionRepositoryNullableCampaignId.test.js
+  recordTransaction campaignId nullability
+    ✓ passes SQL null at $7 when campaignId is undefined (1 ms)
+    ✓ passes SQL null at $7 when campaignId is null
+
+PASS tests/transactionRepository.test.js
+  getMerchantTotals
+    ✓ returns grouped distribution and redemption totals as numeric strings (3 ms)
+    ✓ returns zero strings when no matching transactions exist
+    ✓ returns zero string for missing grouped type (1 ms)
+
+---------------------------|---------|----------|---------|---------|----------------------------
+File                       | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s          
+---------------------------|---------|----------|---------|---------|----------------------------
+All files                  |    61.9 |    58.82 |   53.84 |   62.01 |                            
+ db                        |   64.28 |    72.41 |   36.36 |   64.28 |                            
+  campaignRepository.js    |   58.33 |    71.42 |      20 |   58.33 | 23,28,50-103               
+  index.js                 |      75 |      100 |       0 |      75 | 16                         
+  transactionRepository.js |   71.42 |       75 |      60 |   71.42 | 48-67                      
+ middleware                |     100 |      100 |     100 |     100 |                            
+  validateEnv.js           |     100 |      100 |     100 |     100 |                            
+ routes                    |   58.86 |    51.19 |   58.33 |   59.23 |                            
+  campaigns.js             |    87.5 |     92.3 |     100 |    87.5 | 52,65,75                   
+  merchants.js             |   83.33 |    84.61 |     100 |   83.33 | 42-49                      
+  rewards.js               |   71.05 |    60.86 |     100 |   71.05 | 15,28,49,57,84-109,112,119 
+  transactions.js          |   36.17 |     9.52 |      25 |   36.95 | 13-66,98-112,124,136-140   
+  trustline.js             |   41.93 |    28.57 |   33.33 |   41.93 | 25,35-58,63-77             
+---------------------------|---------|----------|---------|---------|----------------------------
+Jest: "global" coverage threshold for lines (80%) not met: 62.01%
+Test Suites: 3 failed, 13 passed, 16 total
+Tests:       5 failed, 78 passed, 83 total
+Snapshots:   0 total
+Time:        25.225 s, estimated 27 s
+Ran all test suites.
+npm ERR! Lifecycle script `test` failed with error: 
+npm ERR! Error: command failed 
+npm ERR!   in workspace: nova-rewards-backend@1.0.0 
+npm ERR!   at location: /home/jamilah/Documents/contract/Nova-Rewards/novaRewards/backend 

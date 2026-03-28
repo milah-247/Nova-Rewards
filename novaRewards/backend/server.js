@@ -36,6 +36,15 @@ app.use('/api/trustline', require('./routes/trustline'));
 
 // Global error handler — returns consistent error envelope
 app.use((err, req, res, _next) => {
+  // express-json parsing error
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({
+      success: false,
+      error: 'validation_error',
+      message: 'Invalid JSON payload',
+    });
+  }
+
   console.error(err);
   res.status(err.status || 500).json({
     success: false,
@@ -44,9 +53,11 @@ app.use((err, req, res, _next) => {
   });
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`NovaRewards backend running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`NovaRewards backend running on port ${PORT}`);
+  });
+}
 
 module.exports = app;

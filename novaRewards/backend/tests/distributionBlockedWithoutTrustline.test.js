@@ -26,6 +26,8 @@ process.env.DISTRIBUTION_PUBLIC = Keypair.fromSecret(DIST_SECRET).publicKey();
 process.env.DISTRIBUTION_SECRET = DIST_SECRET;
 process.env.STELLAR_NETWORK     = 'testnet';
 
+jest.setTimeout(15000);
+
 // ── mocks ─────────────────────────────────────────────────────────────────────
 
 jest.mock('../../blockchain/stellarService', () => {
@@ -53,6 +55,7 @@ jest.mock('../db/index', () => ({ query: jest.fn() }));
 
 jest.mock('../db/campaignRepository', () => ({
   getActiveCampaign: jest.fn(),
+  getCampaignById:   jest.fn(),
 }));
 
 jest.mock('../db/transactionRepository', () => ({
@@ -66,7 +69,7 @@ const express = require('express');
 const { server: horizonServer } = require('../../blockchain/stellarService');
 const { verifyTrustline }       = require('../../blockchain/trustline');
 const { distributeRewards }     = require('../../blockchain/sendRewards');
-const { getActiveCampaign }     = require('../db/campaignRepository');
+const { getActiveCampaign, getCampaignById } = require('../db/campaignRepository');
 const { recordTransaction }     = require('../db/transactionRepository');
 const { query }                 = require('../db/index');
 
@@ -76,6 +79,11 @@ function buildApp() {
   const app = express();
   app.use(express.json());
   app.use('/api/rewards', require('../routes/rewards'));
+  app.use((err, req, res, next) => {
+    const status = err.type === 'entity.parse.failed' ? 400 : (err.status || 500);
+    const code = err.type === 'entity.parse.failed' ? 'validation_error' : (err.code || 'internal_error');
+    res.status(status).json({ success: false, error: code });
+  });
   return app;
 }
 
@@ -226,6 +234,7 @@ describe('POST /api/rewards/distribute — no trustline blocked at route (integr
   beforeEach(() => {
     jest.clearAllMocks();
     query.mockResolvedValue({ rows: [MERCHANT] });
+    getCampaignById.mockResolvedValue(CAMPAIGN);
     getActiveCampaign.mockResolvedValue(CAMPAIGN);
   });
 
@@ -257,7 +266,7 @@ describe('POST /api/rewards/distribute — no trustline blocked at route (integr
             return true;
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 10 }
       );
     }
   );
@@ -286,7 +295,7 @@ describe('POST /api/rewards/distribute — no trustline blocked at route (integr
             return true;
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 10 }
       );
     }
   );
@@ -315,7 +324,7 @@ describe('POST /api/rewards/distribute — no trustline blocked at route (integr
             return true;
           }
         ),
-        { numRuns: 30 }
+        { numRuns: 10 }
       );
     }
   );

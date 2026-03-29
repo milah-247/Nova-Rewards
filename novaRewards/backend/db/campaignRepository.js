@@ -13,9 +13,11 @@ const { query } = require('./index');
 function validateCampaign({ rewardRate, startDate, endDate }) {
   const errors = [];
 
-  if (rewardRate === undefined || rewardRate === null || isNaN(Number(rewardRate))) {
-    errors.push('rewardRate must be a number');
-  } else if (Number(rewardRate) <= 0) {
+  if (typeof rewardRate !== 'number') {
+    errors.push('rewardRate must be a number, not a string or other type');
+  } else if (isNaN(rewardRate)) {
+    errors.push('rewardRate must be a valid number');
+  } else if (rewardRate <= 0) {
     errors.push('rewardRate must be greater than 0');
   }
 

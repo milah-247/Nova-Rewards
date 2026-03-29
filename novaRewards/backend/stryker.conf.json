@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "packageManager": "npm",
+  "testRunner": "jest",
+  "jest": {
+    "configFile": "jest.config.js"
+  },
+  "mutate": [
+    "routes/auth.js",
+    "routes/campaigns.js",
+    "db/campaignRepository.js",
+    "db/userRepository.js"
+  ],
+  "coverageAnalysis": "perTest",
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 50
+  },
+  "timeoutMS": 60000,
+  "concurrency": 2,
+  "reporters": ["html", "clear-text", "progress", "json"],
+  "htmlReporter": {
+    "baseDir": "reports/mutation"
+  },
+  "ignoreStatic": true,
+  "disableTypeChecks": "{test,spec,src/**/*.@(ts|js)}",
+  "tempDirName": "stryker-tmp"
+}

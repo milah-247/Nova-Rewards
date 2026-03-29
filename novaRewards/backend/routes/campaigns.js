@@ -68,8 +68,17 @@ router.get('/', authenticateMerchant, async (req, res, next) => {
  */
 router.get('/:merchantId', async (req, res, next) => {
   try {
+    // Strict integer validation - reject decimals and special characters
+    if (!/^\d+$/.test(req.params.merchantId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'validation_error',
+        message: 'merchantId must be a positive integer',
+      });
+    }
+    
     const merchantId = parseInt(req.params.merchantId, 10);
-    if (isNaN(merchantId) || merchantId <= 0) {
+    if (merchantId <= 0) {
       return res.status(400).json({
         success: false,
         error: 'validation_error',

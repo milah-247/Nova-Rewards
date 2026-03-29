@@ -14,7 +14,7 @@ This directory contains all security audit reports for the Nova Rewards project.
 
 | Date | Auditor | Scope | Status | Report |
 |------|---------|--------|--------|--------|
-| *No scheduled audits yet* | - | - | - | - |
+| 2026-Q2 | TBD | nova-rewards, nova_token, referral, vesting, reward_pool, admin_roles | Scheduled | Pending |
 
 ## Severity Levels
 

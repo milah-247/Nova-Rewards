@@ -50,7 +50,7 @@ router.post('/distribute', distributeRateLimiter, authenticateMerchant, async (r
     }
 
     // Verify trustline exists
-    const hasTrustline = await verifyTrustline(walletAddress);
+    const { exists: hasTrustline } = await verifyTrustline(walletAddress);
     if (!hasTrustline) {
       return res.status(400).json({
         success: false,
@@ -89,7 +89,7 @@ router.post('/distribute', distributeRateLimiter, authenticateMerchant, async (r
 
     // Distribute rewards
     const result = await distributeRewards({
-      recipient: walletAddress,
+      toWallet: walletAddress,
       amount,
       campaignId,
     });

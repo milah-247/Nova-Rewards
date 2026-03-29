@@ -184,7 +184,7 @@ describe('POST /api/redemptions', () => {
         .send({ userId: 1, rewardId: 5 });
 
       expect(res.status).toBe(400);
-      expect(res.body.error).toBe('validation_error');
+      expect(res.body.error).toBe('missing_idempotency_key');
       expect(res.body.message).toMatch(/X-Idempotency-Key/);
     });
 

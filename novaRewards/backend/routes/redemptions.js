@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { authenticateUser } = require('../middleware/authenticateUser');
+const { requireIdempotencyKey } = require('../src/middleware/idempotency');
 const { redeemReward, getRedemptionById, getUserRedemptions } = require('../db/redemptionRepository');
 const { getUserById } = require('../db/userRepository');
 const { getRewardById } = require('../db/adminRepository');
@@ -28,18 +29,8 @@ router.use(authenticateUser);
  *   404  – reward not found
  *   409  – out of stock | insufficient points | reward inactive
  */
-router.post('/', async (req, res, next) => {
+router.post('/', requireIdempotencyKey, async (req, res, next) => {
   try {
-    // ── Idempotency key ───────────────────────────────────────────────────
-    const idempotencyKey = req.headers['x-idempotency-key'];
-    if (!idempotencyKey || typeof idempotencyKey !== 'string' || idempotencyKey.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        error: 'validation_error',
-        message: 'X-Idempotency-Key header is required',
-      });
-    }
-
     // ── Body validation ───────────────────────────────────────────────────
     const { userId, rewardId } = req.body;
 
@@ -75,7 +66,7 @@ router.post('/', async (req, res, next) => {
     const { redemption, pointTx, idempotent } = await redeemReward({
       userId: userIdNum,
       rewardId: rewardIdNum,
-      idempotencyKey: idempotencyKey.trim(),
+      idempotencyKey: req.idempotencyKey,
     });
 
     // ── Emit event (fire-and-forget) ──────────────────────────────────────

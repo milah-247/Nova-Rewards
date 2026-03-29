@@ -49,6 +49,17 @@ jest.mock('../../blockchain/trustline', () => ({
   verifyTrustline: jest.fn(),
 }));
 
+jest.mock('../middleware/authenticateMerchant', () => ({
+  authenticateMerchant: (req, res, next) => {
+    req.merchant = { id: 42, api_key: 'test-api-key-prop8' };
+    next();
+  },
+}));
+
+jest.mock('express-rate-limit', () => {
+  return jest.fn(() => (req, res, next) => next());
+});
+
 jest.mock('../db/index', () => ({ query: jest.fn() }));
 
 jest.mock('../db/campaignRepository', () => ({
@@ -253,7 +264,7 @@ describe('POST /api/rewards/distribute — no trustline blocked at route (integr
             const { status, body } = await post(
               srv,
               '/api/rewards/distribute',
-              { customerWallet, amount, campaignId },
+              { walletAddress: customerWallet, amount, campaignId },
               { 'x-api-key': VALID_API_KEY }
             );
 
@@ -285,7 +296,7 @@ describe('POST /api/rewards/distribute — no trustline blocked at route (integr
             const { status, body } = await post(
               srv,
               '/api/rewards/distribute',
-              { customerWallet, amount, campaignId: CAMPAIGN.id },
+              { walletAddress: customerWallet, amount, campaignId: CAMPAIGN.id },
               { 'x-api-key': VALID_API_KEY }
             );
 
@@ -315,7 +326,7 @@ describe('POST /api/rewards/distribute — no trustline blocked at route (integr
             const { body } = await post(
               srv,
               '/api/rewards/distribute',
-              { customerWallet, amount: '10', campaignId: CAMPAIGN.id },
+              { walletAddress: customerWallet, amount: '10', campaignId: CAMPAIGN.id },
               { 'x-api-key': VALID_API_KEY }
             );
 

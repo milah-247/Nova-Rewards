@@ -32,6 +32,21 @@ jest.mock('../../blockchain/stellarService', () => ({
   }),
 }));
 
+jest.mock('../../blockchain/trustline', () => ({
+  verifyTrustline: jest.fn().mockResolvedValue({ exists: true }),
+}));
+
+jest.mock('../middleware/authenticateMerchant', () => ({
+  authenticateMerchant: (req, res, next) => {
+    req.merchant = { id: 1, api_key: 'test-api-key' };
+    next();
+  },
+}));
+
+jest.mock('express-rate-limit', () => {
+  return jest.fn(() => (req, res, next) => next());
+});
+
 const express = require('express');
 const http = require('http');
 const { Keypair } = require('stellar-sdk');
@@ -96,7 +111,7 @@ describe('POST /api/rewards/distribute — campaign not found', () => {
     const response = await postDistribute(
       server,
       {
-        customerWallet: Keypair.random().publicKey(),
+        walletAddress: Keypair.random().publicKey(),
         amount: 10,
         campaignId: 999,
       },

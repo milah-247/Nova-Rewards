@@ -101,4 +101,25 @@ async function getRewardById(id) {
   return rows[0] || null;
 }
 
-module.exports = { getStats, listUsers, createReward, updateReward, deleteReward, getRewardById };
+async function listRewards() {
+  const { rows } = await query(
+    `SELECT id, name, cost, stock, is_active
+     FROM rewards
+     WHERE is_deleted = FALSE AND is_active = TRUE
+     ORDER BY created_at DESC`
+  );
+
+  return rows.map((reward) => ({
+    id: reward.id,
+    name: reward.name,
+    pointCost: Number(reward.cost),
+    cost: reward.cost,
+    stock: reward.stock,
+    category: null,
+    description: null,
+    image: null,
+    isActive: reward.is_active,
+  }));
+}
+
+module.exports = { getStats, listUsers, createReward, updateReward, deleteReward, getRewardById, listRewards };

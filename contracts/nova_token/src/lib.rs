@@ -32,16 +32,18 @@ impl NovaToken {
 
     fn balance_of(env: &Env, addr: &Address) -> i128 {
         let key = DataKey::Balance(addr.clone());
-        let balance = env.storage().persistent().get(&key).unwrap_or(0);
-        // Extend TTL by 31 days (2,678,400 ledgers at 5s/ledger)
-        env.storage().persistent().extend_ttl(&key, 2_678_400, 2_678_400);
-        balance
+        if env.storage().persistent().has(&key) {
+            let balance: i128 = env.storage().persistent().get(&key).unwrap();
+            env.storage().persistent().extend_ttl(&key, 2_678_400, 2_678_400);
+            balance
+        } else {
+            0
+        }
     }
 
     fn set_balance(env: &Env, addr: &Address, amount: i128) {
         let key = DataKey::Balance(addr.clone());
         env.storage().persistent().set(&key, &amount);
-        // Extend TTL by 31 days
         env.storage().persistent().extend_ttl(&key, 2_678_400, 2_678_400);
     }
 
@@ -110,10 +112,13 @@ impl NovaToken {
 
     pub fn allowance(env: Env, owner: Address, spender: Address) -> i128 {
         let key = DataKey::Allowance(owner, spender);
-        let allowance = env.storage().persistent().get(&key).unwrap_or(0);
-        // Extend TTL by 31 days
-        env.storage().persistent().extend_ttl(&key, 2_678_400, 2_678_400);
-        allowance
+        if env.storage().persistent().has(&key) {
+            let val: i128 = env.storage().persistent().get(&key).unwrap();
+            env.storage().persistent().extend_ttl(&key, 2_678_400, 2_678_400);
+            val
+        } else {
+            0
+        }
     }
 }
 

@@ -17,9 +17,11 @@
 - Added scheduled audit entry to `docs/audits/README.md` for Q2 2026
 - Audit reports directory already exists at `docs/audits/reports/`
 
-### 3. Frontend Build Check (FIXED)
+### 3. Frontend Build Check (PASSING)
 - Removed npm cache dependency on non-existent `package-lock.json`
-- CI will now install dependencies without cache
+- Added missing dependency `react-joyride` to package.json
+- Fixed incorrect import paths in auth pages (`../../login` → `../login`, `../../register` → `../register`)
+- Build now completes successfully with all pages generated
 
 ## ⚠️ Remaining Issue
 
@@ -49,4 +51,7 @@ The Vercel deployment workflow requires three GitHub secrets to be configured:
 - `novaRewards/backend/routes/rewards.js` - Fixed verifyTrustline and distributeRewards calls
 - `novaRewards/backend/routes/redemptions.js` - Added requireIdempotencyKey middleware
 - `novaRewards/backend/tests/*.test.js` - Fixed mocks and test expectations (5 files)
+- `novaRewards/frontend/package.json` - Added react-joyride dependency
+- `novaRewards/frontend/pages/auth/login.js` - Fixed import path
+- `novaRewards/frontend/pages/auth/register.js` - Fixed import path
 - Deleted: `novaRewards/backend/tests/redemption.test.js` (duplicate test)

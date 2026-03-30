@@ -46,14 +46,18 @@ export default function MerchantDashboard() {
   const loadDashboard = useCallback(
     async (mid) => {
       try {
-        const [campRes] = await Promise.all([api.get(`/api/campaigns/${mid}`)]);
+        const [campRes] = await Promise.all([
+          api.get('/api/campaigns', {
+            headers: { 'x-api-key': apiKey },
+          }),
+        ]);
         setCampaigns(campRes.data.data || []);
         await getMerchantTotals(mid);
       } catch {
         // silently ignore on first load
       }
     },
-    [getMerchantTotals],
+    [apiKey, getMerchantTotals],
   );
 
   useEffect(() => {

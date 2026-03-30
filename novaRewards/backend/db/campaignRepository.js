@@ -35,6 +35,52 @@ function validateCampaign({ rewardRate, startDate, endDate }) {
 }
 
 /**
+ * Validates partial campaign updates.
+ *
+ * @param {object} params
+ * @param {string} [params.name]
+ * @param {number|string} [params.rewardRate]
+ * @param {string} [params.startDate]
+ * @param {string} [params.endDate]
+ * @returns {{ valid: boolean, errors: string[] }}
+ */
+function validateCampaignUpdate({ name, rewardRate, startDate, endDate }) {
+  const errors = [];
+
+  if (name !== undefined) {
+    if (typeof name !== 'string' || name.trim() === '') {
+      errors.push('name must be a non-empty string');
+    }
+  }
+
+  if (rewardRate !== undefined) {
+    if (rewardRate === null || isNaN(Number(rewardRate))) {
+      errors.push('rewardRate must be a number');
+    } else if (Number(rewardRate) <= 0) {
+      errors.push('rewardRate must be greater than 0');
+    }
+  }
+
+  const hasStartDate = startDate !== undefined;
+  const hasEndDate = endDate !== undefined;
+  if (hasStartDate || hasEndDate) {
+    if (!hasStartDate || !hasEndDate) {
+      errors.push('startDate and endDate must both be provided when updating dates');
+    } else {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        errors.push('startDate and endDate must be valid dates');
+      } else if (end <= start) {
+        errors.push('endDate must be strictly after startDate');
+      }
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+/**
  * Creates a new reward campaign in the database.
  * Requirements: 7.2
  *
@@ -103,10 +149,121 @@ async function getActiveCampaign(campaignId) {
   return result.rows[0] || null;
 }
 
+/**
+ * Updates campaign fields for a merchant.
+ *
+ * @param {object} params
+ * @param {number} params.campaignId
+ * @param {number} params.merchantId
+ * @param {string} [params.name]
+ * @param {number|string} [params.rewardRate]
+ * @param {string} [params.startDate]
+ * @param {string} [params.endDate]
+ * @returns {Promise<object|null>} Updated campaign or null if not found
+ */
+async function updateCampaign({ campaignId, merchantId, name, rewardRate, startDate, endDate }) {
+  const fields = [];
+  const values = [];
+  let index = 1;
+
+  if (name !== undefined) {
+    fields.push(`name = $${index++}`);
+    values.push(name.trim());
+  }
+  if (rewardRate !== undefined) {
+    fields.push(`reward_rate = $${index++}`);
+    values.push(rewardRate);
+  }
+  if (startDate !== undefined && endDate !== undefined) {
+    fields.push(`start_date = $${index++}`);
+    values.push(startDate);
+    fields.push(`end_date = $${index++}`);
+    values.push(endDate);
+  }
+
+  if (fields.length === 0) {
+    throw new Error('No update fields provided');
+  }
+
+  const result = await query(
+    `UPDATE campaigns SET ${fields.join(', ')}
+     WHERE id = $${index++} AND merchant_id = $${index}
+     RETURNING *`,
+    [...values, campaignId, merchantId]
+  );
+
+  return result.rows[0] || null;
+}
+
+/**
+ * Deletes a campaign belonging to a merchant.
+ *
+ * @param {number} campaignId
+ * @param {number} merchantId
+ * @returns {Promise<object|null>} Deleted campaign row or null if not found
+ */
+async function deleteCampaign(campaignId, merchantId) {
+  const result = await query(
+    `DELETE FROM campaigns
+     WHERE id = $1 AND merchant_id = $2
+     RETURNING *`,
+    [campaignId, merchantId]
+  );
+  return result.rows[0] || null;
+}
+
+/**
+ * Sets the campaign active state for a merchant.
+ *
+ * @param {number} campaignId
+ * @param {number} merchantId
+ * @param {boolean} isActive
+ * @returns {Promise<object|null>} Updated campaign row or null if not found
+ */
+async function setCampaignActiveState(campaignId, merchantId, isActive) {
+  const result = await query(
+    `UPDATE campaigns
+     SET is_active = $1
+     WHERE id = $2 AND merchant_id = $3
+     RETURNING *`,
+    [isActive, campaignId, merchantId]
+  );
+  return result.rows[0] || null;
+}
+
+/**
+ * Lists unique participants for a campaign.
+ *
+ * @param {number} campaignId
+ * @returns {Promise<object[]>}
+ */
+async function getCampaignParticipants(campaignId) {
+  const result = await query(
+    `SELECT
+       u.id,
+       u.wallet_address,
+       COUNT(p.*) AS interaction_count,
+       SUM(p.amount) AS total_amount,
+       MAX(p.created_at) AS last_activity_at
+     FROM point_transactions p
+     JOIN users u ON u.id = p.user_id
+     WHERE p.campaign_id = $1
+     GROUP BY u.id, u.wallet_address
+     ORDER BY last_activity_at DESC`,
+    [campaignId]
+  );
+  return result.rows;
+}
+
 module.exports = {
   validateCampaign,
+  validateCampaignUpdate,
   createCampaign,
   getCampaignsByMerchant,
   getCampaignById,
   getActiveCampaign,
+  updateCampaign,
+  deleteCampaign,
+  setCampaignActiveState,
+  getCampaignParticipants,
 };

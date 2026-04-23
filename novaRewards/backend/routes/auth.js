@@ -5,7 +5,122 @@ const { signAccessToken, signRefreshToken } = require('../services/tokenService'
 const { validateRegisterDto } = require('../dtos/registerDto');
 const { validateLoginDto } = require('../dtos/loginDto');
 
+const { generateChallenge, verifySignature } = require('../services/stellarAuthService');
+
 const SALT_ROUNDS = 12;
+
+/**
+ * @openapi
+ * /auth/challenge:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Request a unique challenge nonce for wallet signature
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [walletAddress]
+ *             properties:
+ *               walletAddress:
+ *                 type: string
+ *                 example: GABC...
+ *     responses:
+ *       200:
+ *         description: Nonce generated.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data: { nonce: { type: string } }
+ *       400:
+ *         description: Invalid address.
+ */
+router.post('/challenge', async (req, res, next) => {
+  try {
+    const { walletAddress } = req.body;
+    if (!walletAddress) {
+      return res.status(400).json({
+        success: false,
+        error: 'missing_wallet_address',
+        message: 'walletAddress is required',
+      });
+    }
+
+    const nonce = await generateChallenge(walletAddress);
+    return res.json({ success: true, data: { nonce } });
+  } catch (err) {
+    if (err.message === 'Invalid Stellar address') {
+      return res.status(400).json({
+        success: false,
+        error: 'invalid_address',
+        message: err.message,
+      });
+    }
+    next(err);
+  }
+});
+
+/**
+ * @openapi
+ * /auth/verify:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Verify wallet signature and obtain JWT
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [walletAddress, signature]
+ *             properties:
+ *               walletAddress:
+ *                 type: string
+ *                 example: GABC...
+ *               signature:
+ *                 type: string
+ *                 description: Base64 encoded signature of the nonce
+ *     responses:
+ *       200:
+ *         description: Authentication successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data: { $ref: '#/components/schemas/AuthTokens' }
+ *       401:
+ *         description: Unauthorized.
+ */
+router.post('/verify', async (req, res, next) => {
+  try {
+    const { walletAddress, signature } = req.body;
+    if (!walletAddress || !signature) {
+      return res.status(400).json({
+        success: false,
+        error: 'missing_fields',
+        message: 'walletAddress and signature are required',
+      });
+    }
+
+    const result = await verifySignature(walletAddress, signature);
+    return res.json({ success: true, data: result });
+  } catch (err) {
+    if (err.status === 401) {
+      return res.status(401).json({
+        success: false,
+        error: err.code,
+        message: err.message,
+      });
+    }
+    next(err);
+  }
+});
 
 /**
  * @openapi

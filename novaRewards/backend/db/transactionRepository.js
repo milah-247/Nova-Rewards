@@ -276,7 +276,7 @@ async function getTransactionHistory(filters = {}) {
  * @returns {Promise<object|null>}
  */
 async function updateTransaction(txHash, updates = {}) {
-  const allowedFields = ['status', 'refund_reason', 'reference_tx_hash', 'reconciled_at', 'metadata'];
+  const allowedFields = ['status', 'refund_reason', 'reference_tx_hash', 'reconciled_at', 'metadata', 'stellar_ledger'];
   const assignments = [];
   const params = [];
 

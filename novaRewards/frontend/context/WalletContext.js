@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { connectWallet as connectFreighter, isFreighterInstalled } from '../lib/freighter';
+import { connectWallet as connectFreighter, isFreighterInstalled, sign as signFreighter } from '../lib/freighter';
 import { getNOVABalance, getTransactionHistory } from '../lib/horizonClient';
 
 const WalletContext = createContext(null);
@@ -104,6 +104,15 @@ export function WalletProvider({ children }) {
     }
   }, [refreshBalance]);
 
+  const sign = useCallback(async (xdr) => {
+    if (!publicKey) throw new Error('Wallet not connected.');
+    if (walletType === 'freighter') {
+      return await signFreighter(xdr);
+    } else {
+      throw new Error(`Signing not supported for wallet type: ${walletType}`);
+    }
+  }, [publicKey, walletType]);
+
   const disconnect = useCallback(() => {
     setPublicKey(null);
     setWalletType(null);
@@ -125,6 +134,7 @@ export function WalletProvider({ children }) {
       error,
       connect,
       disconnect,
+      sign,
       refreshBalance,
       hydrated,
     }}>

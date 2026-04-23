@@ -1,83 +1,69 @@
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
 import { useWallet } from '../context/WalletContext';
 import { useRouter } from 'next/router';
-import LanguageSwitcher from '../components/LanguageSwitcher';
-import { useEffect } from 'react';
+import Link from 'next/link';
+import WalletConnectButton from '../components/WalletConnectButton';
 
 export default function Home() {
   const { t } = useTranslation('common');
-  const { publicKey, connect, loading, error, freighterInstalled, disconnect } = useWallet();
+  const { publicKey, freighterInstalled, error } = useWallet();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    if (publicKey) router.push('/dashboard');
+    if (publicKey) {
+      router.push('/dashboard');
+    }
   }, [publicKey, router]);
 
-  const handleDisconnect = () => {
-    disconnect();
-    router.push('/');
-  };
+  if (!mounted) return null;
 
   return (
     <>
-      <nav className="nav">
-        <span className="nav-brand">{t('nav.brand')}</span>
-        <div className="nav-links">
-          <a href="/merchant">Merchant Portal</a>
-          <a href="/auth/register">Email Sign Up</a>
-          <a href="/auth/login">Email Login</a>
-          {publicKey && (
-            <button
-              className="btn btn-secondary"
-              onClick={handleDisconnect}
-              style={{ padding: "0.4rem 1rem" }}
-            >
-              {t('nav.disconnect')}
-            </button>
-          )}
+      <nav className="nav flex items-center justify-between p-4 border-b dark:border-brand-border">
+        <span className="nav-brand font-bold text-xl text-violet-600">NovaRewards</span>
+        <div className="nav-links flex gap-4 items-center">
+          <Link href="/merchant" className="text-sm font-medium hover:text-violet-600 transition-colors dark:text-slate-300">Merchant Portal</Link>
+          <Link href="/auth/register" className="text-sm font-medium hover:text-violet-600 transition-colors dark:text-slate-300">Email Sign Up</Link>
+          <Link href="/auth/login" className="text-sm font-medium hover:text-violet-600 transition-colors dark:text-slate-300">Email Login</Link>
+          <WalletConnectButton />
         </div>
       </nav>
 
-      <div className="container" style={{ textAlign: 'center', paddingTop: '5rem' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>
-          {t('home.title')}
+      <div className="container mx-auto px-4" style={{ textAlign: 'center', paddingTop: '5rem' }}>
+        <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-slate-900 dark:text-white">
+          {t('home.title') || 'Welcome to NovaRewards'}
         </h1>
-        <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '2.5rem', maxWidth: 500, margin: '0 auto 2.5rem' }}>
-          {t('home.description')}
+        <p className="text-slate-500 dark:text-slate-400 text-lg mb-10 max-w-lg mx-auto">
+          {t('home.description') || 'The next generation of loyalty rewards powered by Stellar.'}
         </p>
 
-        {freighterInstalled === false ? (
-          <div className="card" style={{ maxWidth: 420, margin: '0 auto' }}>
-            <p style={{ marginBottom: '1rem' }}>
-              {t('home.freighterRequired')}
-            </p>
-            <a
-              href="https://www.freighter.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary"
-            >
-              {t('home.installFreighter')}
-            </a>
-          </div>
-        ) : (
-          <button
-            className="btn btn-primary"
-            style={{ fontSize: '1.1rem', padding: '0.8rem 2rem' }}
-            onClick={connect}
-            disabled={isLoading}
-          >
-            {loading ? t('home.connecting') : t('home.connectWallet')}
-          </button>
-        )}
+        <div className="flex flex-col items-center justify-center gap-4">
+          {freighterInstalled === false ? (
+            <div className="card max-w-md p-6 border rounded-xl shadow-sm bg-white dark:bg-brand-card dark:border-brand-border">
+              <p className="mb-4 text-slate-600 dark:text-slate-300">
+                {t('home.freighterRequired') || 'Freighter wallet is required to use NovaRewards.'}
+              </p>
+              <a
+                href="https://www.freighter.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-md font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700 h-10 px-4 py-2"
+              >
+                {t('home.installFreighter') || 'Install Freighter'}
+              </a>
+            </div>
+          ) : (
+            <div className="scale-125">
+              <WalletConnectButton />
+            </div>
+          )}
+        </div>
 
-        {error && <p className="error" style={{ marginTop: '1rem' }}>{error}</p>}
-
-        {/* TODO: link tokenomics doc — add a "Tokenomics" section here pointing to docs/tokenomics.md or the hosted URL */}
+        {error && <p className="text-red-500 mt-4 text-sm font-medium">{error}</p>}
       </div>
     </>
   );
 }
-

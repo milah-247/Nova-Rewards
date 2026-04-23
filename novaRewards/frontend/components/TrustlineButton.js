@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useWallet } from '../hooks/useWallet';
 import { signAndSubmit } from '../lib/freighter';
 import api from '../lib/api';
 import TransactionLink from './TransactionLink';
@@ -10,7 +11,7 @@ import TransactionLink from './TransactionLink';
  * Requirements: 2.1, 2.2
  */
 export default function TrustlineButton({ onSuccess }) {
-  const { publicKey: walletAddress } = useWalletStore();
+  const { publicKey: walletAddress } = useWallet();
   const [status, setStatus] = useState('idle'); // idle | loading | done | error
   const [message, setMessage] = useState('');
   const [txHash, setTxHash] = useState('');

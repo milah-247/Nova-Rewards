@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { StrKey, Asset, TransactionBuilder, Operation, Networks, BASE_FEE, Horizon } from 'stellar-sdk';
+import { useWallet } from '../hooks/useWallet';
 import { signAndSubmit } from '../lib/freighter';
 import api from '../lib/api';
 import TransactionLink from './TransactionLink';
@@ -16,12 +17,14 @@ const NETWORK_PASSPHRASE =
  * Requirements: 4.1, 4.2, 4.5
  */
 export default function RedeemForm({ onSuccess }) {
-  const { publicKey: senderPublicKey, balance: senderBalance } = useWalletStore();
+  const { publicKey: senderPublicKey, balance: senderBalance } = useWallet();
   const [merchantWallet, setMerchantWallet] = useState('');
   const [amount, setAmount] = useState('');
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
+  const [txHash, setTxHash] = useState('');
   const [amountError, setAmountError] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
 
   function isValidAddress(addr) {

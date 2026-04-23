@@ -55,6 +55,26 @@ export async function connectWallet() {
 }
 
 /**
+ * Signs an XDR transaction with Freighter.
+ * Requirements: 8.2
+ *
+ * @param {string} xdr - Unsigned transaction XDR string
+ * @returns {Promise<string>} Signed transaction XDR string
+ * @throws {Error} if signing fails
+ */
+export async function sign(xdr) {
+  const signResult = await signTransaction(xdr, {
+    networkPassphrase: NETWORK_PASSPHRASE,
+  });
+
+  if (signResult.error) {
+    throw new Error(`Transaction signing failed: ${signResult.error}`);
+  }
+
+  return signResult.signedTxXdr;
+}
+
+/**
  * Signs an XDR transaction with Freighter and submits it to Horizon.
  * Requirements: 8.2
  *

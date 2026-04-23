@@ -6,13 +6,18 @@ const REFRESH_EXPIRES_IN = getConfig('JWT_REFRESH_EXPIRES_IN', '7d');
 
 /**
  * Signs an access token for the given user payload.
- * @param {{ id: number, email: string, role: string }} payload
+ * @param {{ id: number, email?: string, role: string, wallet_address?: string }} payload
  * @returns {string}
  */
 function signAccessToken(payload) {
   const secret = getRequiredConfig('JWT_SECRET');
   return jwt.sign(
-    { userId: payload.id, email: payload.email, role: payload.role },
+    { 
+      userId: payload.id, 
+      email: payload.email, 
+      role: payload.role,
+      walletAddress: payload.wallet_address || payload.walletAddress
+    },
     secret,
     { expiresIn: ACCESS_EXPIRES_IN }
   );

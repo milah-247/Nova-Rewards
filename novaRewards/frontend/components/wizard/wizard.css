@@ -1,0 +1,414 @@
+/* Campaign Wizard Design Tokens and Styles */
+
+:root {
+  /* Colors */
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --color-primary-light: #dbeafe;
+  
+  --color-success: #22c55e;
+  --color-success-dark: #16a34a;
+  --color-success-light: #dcfce7;
+  
+  --color-error: #dc2626;
+  --color-error-dark: #b91c1c;
+  --color-error-light: #fee2e2;
+  
+  --color-warning: #eab308;
+  --color-warning-dark: #ca8a04;
+  --color-warning-light: #fef3c7;
+  
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-600: #4b5563;
+  --color-neutral-900: #111827;
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-2xl: 4rem;
+  
+  /* Typography */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  
+  /* Transitions */
+  --transition-fast: 100ms ease-in-out;
+  --transition-base: 150ms ease-in-out;
+  --transition-slow: 200ms ease-in-out;
+}
+
+/* Form Elements */
+.wizard-input,
+.wizard-textarea,
+.wizard-select {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-base);
+}
+
+.wizard-input:hover,
+.wizard-textarea:hover,
+.wizard-select:hover {
+  border-color: var(--color-neutral-400);
+}
+
+.wizard-input:focus,
+.wizard-textarea:focus,
+.wizard-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+  background-color: white;
+}
+
+.wizard-input.error,
+.wizard-textarea.error,
+.wizard-select.error {
+  border-color: var(--color-error);
+  background-color: var(--color-error-light);
+}
+
+/* Button Styles */
+.wizard-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.wizard-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wizard-button-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.wizard-button-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.wizard-button-secondary {
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-900);
+}
+
+.wizard-button-secondary:hover:not(:disabled) {
+  background-color: var(--color-neutral-300);
+}
+
+.wizard-button-success {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.wizard-button-success:hover:not(:disabled) {
+  background-color: var(--color-success-dark);
+  box-shadow: var(--shadow-md);
+}
+
+/* Progress Indicator */
+.wizard-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xl) 0;
+}
+
+.wizard-progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.wizard-progress-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 0.5rem;
+  transition: all var(--transition-base);
+}
+
+.wizard-progress-badge.active {
+  background-color: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-lg);
+  transform: scale(1.1);
+}
+
+.wizard-progress-badge.completed {
+  background-color: var(--color-success);
+  color: white;
+  cursor: pointer;
+}
+
+.wizard-progress-badge.completed:hover {
+  background-color: var(--color-success-dark);
+}
+
+.wizard-progress-badge.inactive {
+  background-color: var(--color-neutral-300);
+  color: var(--color-neutral-600);
+  cursor: not-allowed;
+}
+
+.wizard-progress-line {
+  height: 0.25rem;
+  margin: 1.5rem 0.5rem;
+  flex: 1;
+  transition: background-color var(--transition-base);
+}
+
+.wizard-progress-line.completed {
+  background-color: var(--color-success);
+}
+
+.wizard-progress-line.inactive {
+  background-color: var(--color-neutral-300);
+}
+
+/* Error Display */
+.wizard-error-container {
+  padding: 1rem;
+  margin-bottom: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-error-light);
+  background-color: var(--color-error-light);
+}
+
+.wizard-error-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-error-dark);
+  margin-bottom: 0.5rem;
+}
+
+.wizard-error-list {
+  list-style: disc;
+  list-style-position: inside;
+  color: var(--color-error-dark);
+  font-size: var(--font-size-sm);
+}
+
+.wizard-error-item {
+  margin-bottom: 0.25rem;
+}
+
+/* Validation Messages */
+.wizard-validation-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.wizard-validation-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  color: var(--color-warning-dark);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Help Tooltip */
+.wizard-help-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-left: 0.5rem;
+  color: var(--color-primary);
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: help;
+  transition: all var(--transition-base);
+}
+
+.wizard-help-button:hover {
+  color: var(--color-primary-dark);
+  background-color: var(--color-primary-light);
+}
+
+.wizard-help-tooltip {
+  position: absolute;
+  left: 0;
+  margin-top: 0.5rem;
+  width: 16rem;
+  padding: 1rem;
+  background-color: white;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+}
+
+.wizard-help-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin-bottom: 0.5rem;
+}
+
+.wizard-help-description {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-600);
+  line-height: 1.5;
+}
+
+.wizard-help-examples {
+  margin-top: 0.75rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-600);
+}
+
+.wizard-help-example {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+/* Card Styles */
+.wizard-card {
+  padding: var(--spacing-lg);
+  background-color: white;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.wizard-card:hover {
+  border-color: var(--color-neutral-300);
+  box-shadow: var(--shadow-md);
+}
+
+.wizard-card.selected {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+/* Option Grid */
+.wizard-option-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.wizard-option-radio,
+.wizard-option-checkbox {
+  position: relative;
+  padding: 1rem;
+  border: 2px solid var(--color-neutral-300);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.wizard-option-radio:hover,
+.wizard-option-checkbox:hover {
+  border-color: var(--color-neutral-400);
+}
+
+.wizard-option-radio.selected,
+.wizard-option-checkbox.selected {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .wizard-option-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .wizard-button {
+    width: 100%;
+  }
+  
+  .wizard-progress {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+  
+  .wizard-progress-line {
+    display: none;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .wizard-card {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .wizard-input,
+  .wizard-textarea,
+  .wizard-select {
+    background-color: #111827;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .wizard-help-tooltip {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+}

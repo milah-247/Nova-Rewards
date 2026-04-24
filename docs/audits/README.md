@@ -1,6 +1,10 @@
 # Smart Contract Audits
 
+ feat/define-constants
+This directory tracks all security audits for Nova Rewards smart contracts.
+
 This directory tracks security audits for all Nova Rewards smart contracts.
+ main
 
 ## Audit Status
 
@@ -40,3 +44,4 @@ Audit PDF reports are stored in `docs/audits/reports/`.
 1. Use `TEMPLATE.md` to document each audit engagement.
 2. Store final PDF reports in `reports/`.
 3. Update the table above with results.
+ main

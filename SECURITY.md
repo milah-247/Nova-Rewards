@@ -1,6 +1,6 @@
 # Security Policy
 
-Nova Rewards welcomes responsible disclosure of security vulnerabilities that could affect the platform, its smart contracts, backend services, APIs, or supporting infrastructure.
+Nova Rewards welcomes responsible disclosure of security vulnerabilities. For detailed information on our security posture, audits, and best practices, please visit our [Security Center](./docs/security/README.md).
 
 ## Reporting a Vulnerability
 

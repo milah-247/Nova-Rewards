@@ -1,41 +1,36 @@
+'use strict';
+
 const { v4: uuidv4 } = require('uuid');
+const logger = require('../lib/logger');
 
 /**
- * Middleware to generate and propagate trace IDs.
- * Requirements: #366 Distributed Tracing
+ * Generates a correlationId per request and propagates it through headers
+ * and res.locals so all downstream code can attach it to log entries.
+ * Satisfies #627 (correlation ID) and #366 (distributed tracing).
  */
 function tracingMiddleware(req, res, next) {
-  // Check if trace ID already exists (e.g., from upstream service or client)
-  const incomingTraceId = req.header('x-trace-id');
-  const traceId = incomingTraceId || uuidv4();
+  const correlationId = req.header('x-correlation-id') || req.header('x-trace-id') || uuidv4();
 
-  // Attach traceId to the request object for use in services and logging
-  req.traceId = traceId;
+  req.correlationId = correlationId;
+  res.locals.correlationId = correlationId;
+  req.log = logger.withCorrelationId(correlationId);
 
-  // Add traceId to the response headers for observability
-  res.setHeader('x-trace-id', traceId);
+  res.setHeader('x-correlation-id', correlationId);
 
-  // We can also create a basic "span" start time here if needed
   req.startTime = Date.now();
-
   next();
 }
 
 /**
- * Helper to log a trace span event.
- * In a real-world scenario, this would send data to Jaeger/Zipkin/Honeycomb.
+ * Helper to log a trace span event (kept for backward-compat with #366 callers).
  */
 function logSpan(req, name, attributes = {}) {
-  const duration = Date.now() - (req.startTime || Date.now());
-  const logMessage = {
-    message: `[Trace Span] ${name}`,
-    traceId: req.traceId,
-    durationMs: duration,
+  const log = req.log || logger;
+  log.debug('trace_span', {
+    span: name,
+    durationMs: Date.now() - (req.startTime || Date.now()),
     ...attributes,
-  };
-  
-  // For now, log to console in a structured way (or use a logger like winston/pino)
-  console.log(JSON.stringify(logMessage));
+  });
 }
 
 module.exports = { tracingMiddleware, logSpan };

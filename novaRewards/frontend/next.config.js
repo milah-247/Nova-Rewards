@@ -15,7 +15,14 @@ if (process.env.JEST_WORKER_ID === undefined && process.env.NODE_ENV !== 'test')
 const securityHeaders = [
   { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none';" },
   { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
+  // Kept deliberately (#1302 asked for an explicit call rather than an accidental one).
+  // Chrome, Edge and Safari removed the XSS Auditor and ignore this header; the real
+  // protection is the Content-Security-Policy above. It is retained only because
+  // `1; mode=block` is still honoured by older browsers and costs one response header
+  // with no downside — the known footgun is `1` alone (no `mode=block`), which can
+  // introduce a cross-site leak. Drop this line once those browsers are out of scope.
   { key: 'X-XSS-Protection', value: '1; mode=block' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
@@ -79,35 +86,6 @@ const nextConfig = {
   },
   sentry: {
     // Deprecated in v10 — options moved to sentryWebpackPluginOptions below
-  },
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains; preload',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
-        ],
-      },
-    ];
   },
 };
 
